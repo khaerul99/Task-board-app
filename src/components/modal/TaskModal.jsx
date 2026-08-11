@@ -15,6 +15,7 @@ import { MAX_AVATAR, TEAM_MEMBERS } from "../../store/taskStore";
 import React, { useEffect, useState, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Swal from "sweetalert2";
+import { toast } from "react-hot-toast";
 import { AssigneePickerModal } from "./AssigneePickerModal";
 
 const LABELS = ["Feature", "Bug", "Issue", "Undefined"];
@@ -84,15 +85,7 @@ export default function TaskModal({
         onClose();
 
         // Notifikasi Sukses
-        Swal.fire({
-          icon: "success",
-          title: "Dihapus!",
-          text: `Tugas "${task.title}" berhasil dihapus.`,
-          showConfirmButton: false,
-          timer: 1500,
-          toast: true,
-          position: "top-end",
-        });
+        toast.success(`Tugas "${task.title}" berhasil dihapus.`);
       }
     });
   };
@@ -271,17 +264,27 @@ export default function TaskModal({
             <label className="block text-sm font-medium text-gray-700">
               Assignee
             </label>
-            <div className="flex items-center gap-2">
-              {visibleMembers.map((member) => (
-                <div
-                  key={member.id}
-                  title={member.name}
-                  className="w-10 h-10 rounded-full border-2 border-white bg-green-500 flex items-center justify-center text-white font-bold text-sm cursor-pointer"
-                  onClick={handleOpenAssigneePicker}
-                >
-                  {member.name[0]}
-                </div>
-              ))}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center -space-x-3">
+                {visibleMembers.map((member) => (
+                  <div
+                    key={member.id}
+                    title={member.name}
+                    className="w-10 h-10 rounded-full border-2 border-white bg-green-500 flex items-center justify-center text-white font-bold text-sm cursor-pointer overflow-hidden"
+                    onClick={handleOpenAssigneePicker}
+                  >
+                    {member.avatar ? (
+                      <img
+                        src={member.avatar}
+                        alt={`${member.name}'s avatar`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span>{member.name[0]}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
 
               <div
                 className="w-10 h-10 rounded-full border-2 border-dashed border-gray-400 flex items-center justify-center text-gray-500 hover:bg-gray-100 cursor-pointer"

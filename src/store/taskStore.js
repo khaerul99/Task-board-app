@@ -47,9 +47,21 @@ const getInitialState = () => {
   }
 };
 
+
 export const useTaskStore = create((set, get) => ({
     ...getInitialState(),
     searchTerm: '',
+    filters: {
+        label: '',
+        assignee: '',
+        dueDate: ''
+    },
+    
+    setFilters: (newFilters) => set((state) => ({ 
+        filters: { ...state.filters, ...newFilters } 
+    })),
+    
+    
 
   // menambah task baru
   addTask: (columnId, initialTaskData) =>
@@ -162,6 +174,7 @@ export const useTaskStore = create((set, get) => ({
       };
     }),
 
+
   // memindahkan task
   handleDragAndDrop: (activeId, sourceColumnId, destinationColumnId, overId) =>
     set((state) => {
@@ -218,6 +231,7 @@ export const useTaskStore = create((set, get) => ({
     
     const taskIdsInColumn = column.taskIds;
     const lowerCaseSearch = state.searchTerm.toLowerCase();
+    const { label: filterLabel, assignee: filterAssignee, dueDate: filterDueDate } = state.filters;
     
     return taskIdsInColumn
         .map(taskId => state.tasks[taskId]) 
@@ -225,10 +239,17 @@ export const useTaskStore = create((set, get) => ({
             
             if (!task) return false;
 
+            // Search Filter (Title or Description)
+            const matchesSearch = !state.searchTerm || 
+                (task.title && task.title.toLowerCase().includes(lowerCaseSearch)) ||
+                (task.description && task.description.toLowerCase().includes(lowerCaseSearch));
             
-            const titleMatch = !state.searchTerm || (task.title && task.title.toLowerCase().includes(lowerCaseSearch));
+            // Explicit Filters
+            const matchesLabel = !filterLabel || task.label === filterLabel;
+            const matchesAssignee = !filterAssignee || (task.assignees && task.assignees.includes(filterAssignee));
+            const matchesDueDate = !filterDueDate || task.dueDate === filterDueDate;
             
-            return titleMatch;
+            return matchesSearch && matchesLabel && matchesAssignee && matchesDueDate;
         });
 }
 }));

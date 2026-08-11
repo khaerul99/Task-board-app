@@ -1,21 +1,25 @@
 
 import Column from '../column/Column';
-import { DndContext, closestCorners, useSensors, useSensor, PointerSensor } from '@dnd-kit/core';
+import { DndContext, closestCorners, useSensors, useSensor, PointerSensor, DragOverlay } from '@dnd-kit/core';
 import { useTaskStore } from '../../store/taskStore';
 import { FaPlus } from 'react-icons/fa'; 
 import { useState } from 'react';
 import ColumnModal from '../modal/ColumnModal';
 import Swal from 'sweetalert2';
-
-
-
-
+import TaskCard from '../card/TaskCard';
 
 export default function Board({onEditTask, onOpen}) {
-    const {columns, columnOrder, handleDragAndDrop, getFilteredTasks, addColumn, updateColumn, deleteColumn} = useTaskStore();
-    const sensors = useSensors(useSensor(PointerSensor));
+    const {columns, columnOrder, handleDragAndDrop, getFilteredTasks, addColumn, updateColumn, deleteColumn, tasks} = useTaskStore();
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 5,
+            },
+        })
+    );
     const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
     const [currentColumn, setCurrentColumn] = useState(null);
+    const [activeId, setActiveId] = useState(null);
 
     const handleOpenColumnModal = (columnData = null) => {
         setCurrentColumn(columnData);
@@ -81,7 +85,13 @@ export default function Board({onEditTask, onOpen}) {
     };
   
 
+    const handleDragStart = (e) => {
+        const { active } = e;
+        setActiveId(active.id);
+    };
+
     const handleDragEnd = (e) => {
+        setActiveId(null);
         const {active, over} = e;
         if(!over) return;
 
@@ -108,9 +118,9 @@ export default function Board({onEditTask, onOpen}) {
             onSave={handleSaveColumn}
             currentColumn={currentColumn} 
         />
-        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 <div className="flex space-x-7 ">
-                    <div className='flex overflow-x-auto space-x-4 pb-4 h-screen'>
+                    <div className='flex overflow-x-auto space-x-4 pb-4 h-[85vh]'>
                     {
                         columnOrder.map((columnId) => {
                             const column = columns[columnId];
@@ -131,6 +141,9 @@ export default function Board({onEditTask, onOpen}) {
                    
                     
                 </div>
+                <DragOverlay>
+                    {activeId ? <TaskCard task={tasks[activeId]} isOverlay={true} /> : null}
+                </DragOverlay>
         </DndContext>
 
     </>

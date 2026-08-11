@@ -1,24 +1,28 @@
 import React from "react";
 import { FaLock, FaChevronDown, FaUserPlus, FaFilter, FaFolderOpen } from "react-icons/fa6";
 import { FaSistrix } from "react-icons/fa6";
-import { useTaskStore } from "../../store/taskStore";
+import { TEAM_MEMBERS, useTaskStore } from "../../store/taskStore";
 
-const data = [
-  { name: "John Doe", avatar: "assets/users/user1.jpg" },
-  { name: "Jane Smith", avatar: "assets/users/user2.jpg" },
-  { name: "Jane ", avatar: "assets/users/user3.jpg" },
-  { name: "Smith", avatar: "assets/users/user4.jpg" },
-  { name: "aadul", avatar: "assets/users/user5.jpg" },
-];
 
-const MAX_AVATAR = 3;
 
-export default function Navbar({ members = data }) {
-  const visibleMembers = members.slice(0, MAX_AVATAR);
-  const hiddenCount = members.length - MAX_AVATAR;
+
+export default function Navbar() {
+  const MAX_AVATAR = 3;
+  const visibleMembers = TEAM_MEMBERS.slice(0, MAX_AVATAR);
+  const hiddenCount = TEAM_MEMBERS.length - MAX_AVATAR;
 
   const searchTerm = useTaskStore(state => state.searchTerm);
   const setSearchTerm = useTaskStore(state => state.setSearchTerm);
+  const filters = useTaskStore(state => state.filters);
+  const setFilters = useTaskStore(state => state.setFilters);
+  
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+
+  const isFilterActive = filters.assignee !== '' || filters.label !== '' || filters.dueDate !== '';
+
+  const clearFilters = () => {
+    setFilters({ assignee: '', label: '', dueDate: '' });
+  };
     
 
   return (
@@ -69,10 +73,69 @@ export default function Navbar({ members = data }) {
 
         <div className="w-full flex gap-2 justify-end items-center order-2 md:w-auto"> 
           
-          <button className="flex items-center gap-1.5 bg-gray-200 p-1.5 md:p-2 rounded-md cursor-pointer active:scale-90 hover:bg-gray-300 transition text-sm">
-            <FaFilter />
-            <span className="hidden md:inline">Filter</span> 
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className={`flex items-center gap-1.5 p-1.5 md:p-2 rounded-md cursor-pointer transition text-sm ${isFilterActive ? 'bg-teal-100 text-teal-700 font-semibold' : 'bg-gray-200 hover:bg-gray-300'}`}
+            >
+              <FaFilter />
+              <span className="hidden md:inline">Filter</span> 
+              {isFilterActive && <span className="w-2 h-2 rounded-full bg-teal-500 ml-1"></span>}
+            </button>
+
+            {isFilterOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-4 space-y-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-semibold text-gray-700">Filters</h4>
+                  {isFilterActive && (
+                    <button onClick={clearFilters} className="text-xs text-red-500 hover:underline">
+                      Clear All
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500 font-medium">Assignee</label>
+                  <select 
+                    value={filters.assignee}
+                    onChange={(e) => setFilters({ assignee: e.target.value })}
+                    className="w-full border rounded p-1.5 text-sm bg-gray-50 focus:outline-none focus:border-teal-400"
+                  >
+                    <option value="">Any Assignee</option>
+                    {TEAM_MEMBERS.map(m => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500 font-medium">Label</label>
+                  <select 
+                    value={filters.label}
+                    onChange={(e) => setFilters({ label: e.target.value })}
+                    className="w-full border rounded p-1.5 text-sm bg-gray-50 focus:outline-none focus:border-teal-400"
+                  >
+                    <option value="">Any Label</option>
+                    <option value="Feature">Feature</option>
+                    <option value="Bug">Bug</option>
+                    <option value="Issue">Issue</option>
+                    <option value="Undefined">Undefined</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500 font-medium">Due Date</label>
+                  <input 
+                    type="date"
+                    value={filters.dueDate}
+                    onChange={(e) => setFilters({ dueDate: e.target.value })}
+                    className="w-full border rounded p-1.5 text-sm bg-gray-50 focus:outline-none focus:border-teal-400"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           <button className="flex items-center gap-1.5 bg-gray-200 p-1.5 md:p-2 rounded-md cursor-pointer active:scale-90 hover:bg-gray-300 transition text-sm">
             <FaFolderOpen />
             <span className="hidden md:inline">Export/Import</span> 
@@ -82,8 +145,8 @@ export default function Navbar({ members = data }) {
             <FaSistrix className="absolute w-5 h-5 top-2 left-2 text-gray-500" />
             <input
               type="text"
-              className="bg-gray-200 p-2 w-full rounded-md outline-0 pl-10 text-sm"
-              placeholder="Search..."
+              className="bg-gray-200 p-2 w-full rounded-md outline-none pl-10 text-sm focus:bg-white focus:border focus:border-teal-400 transition"
+              placeholder="Search title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

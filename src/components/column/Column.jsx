@@ -44,9 +44,9 @@ export default function Column({ column, tasks, onEditTask, onOpen, openColumnMo
             <button className="p-2 text-gray-500 hover:bg-gray-200 rounded transition">
               <FaEllipsisVertical />
             </button>
-            <div className="absolute flex-col p-2 hidden group-hover:flex  gap-2">
-              <button onClick={handleEditColumn} className="px-6 py-2 bg-blue-200 hover:bg-blue-300 rounded-2xl">Edit</button>
-              <button onClick={handleDeleteColumn} className="px-6 py-2 bg-red-200 hover:bg-red-300 rounded-2xl">delete</button>
+            <div className="absolute flex-col p-2 hidden group-hover:flex z-10 gap-2 bg-white shadow-2xl rounded-lg w-fit">
+              <button onClick={handleEditColumn} className="px-6 py-2 bg-blue-200 hover:bg-blue-300 rounded-lg">Edit</button>
+              <button onClick={handleDeleteColumn} className="px-6 py-2 bg-red-200 hover:bg-red-300 rounded-lg">delete</button>
             </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ import Board from "./components/board/Board";
 import { useTaskStore } from "./store/taskStore";
 import TaskModal from "./components/modal/TaskModal";
 import Swal from "sweetalert2";
+import { Toaster, toast } from "react-hot-toast";
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
   const handleEditTask = (task, columnId) => {
     setCurrentTask(task);
     setCurrentColumnId(columnId);
+    setIsNewTask(false);
     setIsModalOpen(true);
   };
 
@@ -32,29 +34,10 @@ const handleSave = useCallback((updateTaskData) => {
     
     if (isNewTask) { 
         addTask(currentColumnId, updateTaskData); 
-        
-        Swal.fire({ 
-            icon: 'success', 
-            title: 'Task Added!', 
-            text: `Tugas berhasil dibuat.`, 
-            showConfirmButton: false, 
-            timer: 1500, 
-            toast: true, 
-            position: 'top-end' 
-        });
-        
+        toast.success('Task berhasil dibuat!');
     } else {
         updateTask(updateTaskData.id, updateTaskData); 
-        
-        Swal.fire({
-            icon: 'success', 
-            title: 'Task Updated!', 
-            text: `Tugas berhasil diperbarui.`, 
-            showConfirmButton: false, 
-            timer: 1500, 
-            toast: true, 
-            position: 'top-end' 
-        });
+        toast.success('Task berhasil diperbarui!');
     }
     
     setIsModalOpen(false);
@@ -70,6 +53,7 @@ const handleSave = useCallback((updateTaskData) => {
   return (
     <>
       <Layout>
+        <Toaster position="bottom-right" />
         <Board onEditTask={handleEditTask} onOpen={handleOpenTaskModal} />
         
           <TaskModal
@@ -80,7 +64,7 @@ const handleSave = useCallback((updateTaskData) => {
             onDelete={handleDelete}
             onOpen={isModalOpen}
           />
-        
+          
       </Layout>
     </>
   );

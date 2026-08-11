@@ -30,41 +30,59 @@ export const AssigneePickerModal = ({ isOpen, onClose, currentAssignees, onSave 
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[60]"> 
-            <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm p-4">
-                <h3 className="text-lg font-bold mb-4 border-b pb-2">Select Team Members</h3>
-                <div className="max-h-60 overflow-y-auto space-y-2">
-                    {TEAM_MEMBERS.map((member) => (
-                        <div key={member.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 cursor-pointer">
-                            <label className="flex items-center flex-grow cursor-pointer">
-                                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs mr-3">
-                                    {member.name[0]} 
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 flex justify-center items-center z-[60] transition-opacity"> 
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100">
+                <h3 className="text-xl font-bold mb-5 border-b border-gray-100 pb-3 text-gray-800">Assign Members</h3>
+                <div className="max-h-72 overflow-y-auto space-y-3 pr-1">
+                    {TEAM_MEMBERS.map((member) => {
+                        const isSelected = selectedIds.includes(member.id);
+                        return (
+                        <div 
+                            key={member.id} 
+                            onClick={() => handleCheckboxChange(member.id)}
+                            className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 border ${isSelected ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-transparent hover:bg-gray-50'}`}
+                        >
+                            <div className="flex items-center flex-grow">
+                                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-teal-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm mr-4 shadow-sm overflow-hidden border-2 border-white ring-2 ring-gray-100">
+                                    {member.avatar ? (
+                                        <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        member.name[0]
+                                    )}
                                 </div>
-                                <span className="text-gray-800">{member.name}</span>
-                            </label>
-                            <input
-                                type="checkbox"
-                                checked={selectedIds.includes(member.id)}
-                                onChange={() => handleCheckboxChange(member.id)}
-                                className="w-5 h-5 text-teal-600 bg-gray-100 border-gray-300 rounded focus:ring-teal-500"
-                            />
+                                <div className="flex flex-col">
+                                    <span className={`font-semibold ${isSelected ? 'text-teal-900' : 'text-gray-800'}`}>{member.name}</span>
+                                </div>
+                            </div>
+                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-teal-500 border-teal-500' : 'border-gray-300 bg-white'}`}>
+                                {isSelected && (
+                                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                )}
+                            </div>
                         </div>
-                    ))}
+                    )})}
                 </div>
                 
-                <div className="flex justify-end space-x-2 mt-4 pt-2 border-t">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-gray-600 rounded-md hover:bg-gray-100"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleSave}
-                        className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700"
-                    >
-                        Confirm ({selectedIds.length})
-                    </button>
+                <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
+                    <span className="text-sm text-gray-500 font-medium">
+                        {selectedIds.length} selected
+                    </span>
+                    <div className="flex space-x-3">
+                        <button
+                            onClick={onClose}
+                            className="px-5 py-2.5 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            className="px-5 py-2.5 bg-teal-600 text-white font-medium rounded-lg shadow hover:bg-teal-700 hover:shadow-md transition-all active:scale-95"
+                        >
+                            Confirm
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

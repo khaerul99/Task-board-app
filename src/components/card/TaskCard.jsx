@@ -4,14 +4,18 @@ import { MdOutlineTimer } from "react-icons/md";
 import { useSortable } from "@dnd-kit/sortable";
 import { TEAM_MEMBERS, MAX_AVATAR } from "../../store/taskStore";
 
-export default function TaskCard({ task, columnId, onEditTask }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
+export default function TaskCard({ task, columnId, onEditTask, isOverlay }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    cursor: "grab",
+    transform: isOverlay ? undefined : CSS.Translate.toString(transform),
+    transition: isOverlay ? undefined : transition,
+    cursor: isOverlay || isDragging ? "grabbing" : "grab",
+    opacity: isDragging && !isOverlay ? 0.5 : 1,
+    position: "relative",
+    zIndex: isOverlay || isDragging ? 999 : 1,
+    boxShadow: isOverlay ? "0 10px 20px rgba(0,0,0,0.2)" : undefined,
   };
 
   // Checklist Progress
@@ -30,23 +34,36 @@ export default function TaskCard({ task, columnId, onEditTask }) {
   const visibleMembers = assignedMembers.slice(0, MAX_AVATAR);
   const hiddenCount = assignedMembers.length - MAX_AVATAR;
 
+  const getLabelColors = (label) => {
+    switch (label) {
+      case "Feature":
+        return "bg-blue-200 text-blue-700";
+      case "Bug":
+        return "bg-red-200 text-red-600";
+      case "Issue":
+        return "bg-yellow-100 text-yellow-700";
+      default:
+        return "bg-gray-200 text-gray-700";
+    }
+  };
+
   return (
     <div
       key={task.id}
-      ref={setNodeRef}
+      ref={isOverlay ? null : setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      onClick={() => onEditTask(task, columnId)}
+      {...(isOverlay ? {} : attributes)}
+      {...(isOverlay ? {} : listeners)}
+      onClick={isOverlay ? undefined : () => onEditTask(task, columnId)}
     >
-      <div className="p-3 mb-2  bg-blue-100 rounded-lg shadow-md hover:shadow-lg transition duration-200">
+      <div className="p-3 mb-2  bg-blue-100/70 rounded-lg shadow-md hover:shadow-lg transition duration-200">
         <div className="flec flex-col space-y-4">
           <div className="flex justify-center w-full">
             <div className="w-60 h-auto ">
             <img src={task.coverImage} alt="" className="w-full h-full "/>
             </div>
           </div>
-          <h4 className="font-semibold text-sm mb-4 bg-red-200 p-2 text-center w-1/4 rounded-4xl text-red-600 ">
+          <h4 className={`font-semibold text-sm mb-4 px-3 py-1 text-center w-fit rounded-full ${getLabelColors(task.label)}`}>
             {task.label}
           </h4>
           <div className="text-[20px] text-gray-500">
