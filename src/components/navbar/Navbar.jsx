@@ -24,6 +24,20 @@ export default function Navbar() {
     setFilters({ assignee: '', label: '', dueDate: '' });
   };
     
+  const filterRef = React.useRef(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsFilterOpen(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="fixed bg-white w-full z-10 shadow-md">
@@ -73,7 +87,7 @@ export default function Navbar() {
 
         <div className="w-full flex gap-2 justify-end items-center order-2 md:w-auto"> 
           
-          <div className="relative">
+          <div className="relative" ref={filterRef}>
             <button 
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={`flex items-center gap-1.5 p-1.5 md:p-2 rounded-md cursor-pointer transition text-sm ${isFilterActive ? 'bg-teal-100 text-teal-700 font-semibold' : 'bg-gray-200 hover:bg-gray-300'}`}
@@ -83,57 +97,65 @@ export default function Navbar() {
               {isFilterActive && <span className="w-2 h-2 rounded-full bg-teal-500 ml-1"></span>}
             </button>
 
-            {isFilterOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-4 space-y-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold text-gray-700">Filters</h4>
+            <div className={`absolute right-0 mt-3 w-72 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 p-5 space-y-5 transition-all origin-top-right duration-200 ease-out ${isFilterOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}>
+                <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                  <h4 className="font-bold text-slate-800 text-sm tracking-wide">Filters</h4>
                   {isFilterActive && (
-                    <button onClick={clearFilters} className="text-xs text-red-500 hover:underline">
+                    <button onClick={clearFilters} className="text-xs text-rose-500 font-medium hover:text-rose-600 hover:bg-rose-50 px-2 py-1 rounded-md transition-colors">
                       Clear All
                     </button>
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-500 font-medium">Assignee</label>
-                  <select 
-                    value={filters.assignee}
-                    onChange={(e) => setFilters({ assignee: e.target.value })}
-                    className="w-full border rounded p-1.5 text-sm bg-gray-50 focus:outline-none focus:border-teal-400"
-                  >
-                    <option value="">Any Assignee</option>
-                    {TEAM_MEMBERS.map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                  </select>
+                <div className="space-y-2">
+                  <label className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Assignee</label>
+                  <div className="relative">
+                    <select 
+                      value={filters.assignee}
+                      onChange={(e) => setFilters({ assignee: e.target.value })}
+                      className="w-full appearance-none border border-slate-300 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-700 bg-white hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all cursor-pointer shadow-sm"
+                    >
+                      <option value="">Any Assignee</option>
+                      {TEAM_MEMBERS.map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                      <FaChevronDown className="w-3 h-3" />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-500 font-medium">Label</label>
-                  <select 
-                    value={filters.label}
-                    onChange={(e) => setFilters({ label: e.target.value })}
-                    className="w-full border rounded p-1.5 text-sm bg-gray-50 focus:outline-none focus:border-teal-400"
-                  >
-                    <option value="">Any Label</option>
-                    <option value="Feature">Feature</option>
-                    <option value="Bug">Bug</option>
-                    <option value="Issue">Issue</option>
-                    <option value="Undefined">Undefined</option>
-                  </select>
+                <div className="space-y-2">
+                  <label className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Label</label>
+                  <div className="relative">
+                    <select 
+                      value={filters.label}
+                      onChange={(e) => setFilters({ label: e.target.value })}
+                      className="w-full appearance-none border border-slate-300 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-700 bg-white hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all cursor-pointer shadow-sm"
+                    >
+                      <option value="">Any Label</option>
+                      <option value="Feature">Feature</option>
+                      <option value="Bug">Bug</option>
+                      <option value="Issue">Issue</option>
+                      <option value="Undefined">Undefined</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                      <FaChevronDown className="w-3 h-3" />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-500 font-medium">Due Date</label>
+                <div className="space-y-2">
+                  <label className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Due Date</label>
                   <input 
                     type="date"
                     value={filters.dueDate}
                     onChange={(e) => setFilters({ dueDate: e.target.value })}
-                    className="w-full border rounded p-1.5 text-sm bg-gray-50 focus:outline-none focus:border-teal-400"
+                    className="w-full border border-slate-300 rounded-lg py-2 px-3 text-sm text-slate-700 bg-white hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all shadow-sm"
                   />
                 </div>
               </div>
-            )}
           </div>
 
           <button className="flex items-center gap-1.5 bg-gray-200 p-1.5 md:p-2 rounded-md cursor-pointer active:scale-90 hover:bg-gray-300 transition text-sm">
