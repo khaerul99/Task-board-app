@@ -45,7 +45,9 @@ export default function TaskModal({
   const { updateTask } = useTaskStore();
   const [newSubtaskText, setNewSubtaskText] = useState("");
   const fileInputRef = useRef(null);
+  const attachmentInputRef = useRef(null);
   const [isAssigneePickerOpen, setIsAssigneePickerOpen ] = useState(false); 
+  const [isDraggingAttachment, setIsDraggingAttachment] = useState(false);
   const isNewTask = !task || !task.id;
   const [formData, setFormData] = useState(() => {
     const initialData = isNewTask ? { ...DEFAULT_TASK_DATA } : task;
@@ -106,6 +108,27 @@ export default function TaskModal({
     setFormData((prev) => ({
       ...prev,
       coverImage: null,
+    }));
+  };
+
+  const processAttachments = (files) => {
+    const newAttachments = Array.from(files).map(f => f.name);
+    setFormData((prev) => ({
+      ...prev,
+      attachments: [...(prev.attachments || []), ...newAttachments]
+    }));
+  };
+
+  const handleAttachmentChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processAttachments(e.target.files);
+    }
+  };
+
+  const handleRemoveAttachment = (indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, idx) => idx !== indexToRemove)
     }));
   };
 
@@ -367,23 +390,59 @@ export default function TaskModal({
 
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-gray-800">Attachments</h3>
-            <div className="border border-dashed p-4 rounded-lg text-center text-gray-500">
-              <FaFolderOpen size={24} className="mx-auto mb-2" />
+            
+            <input 
+              type="file" 
+              multiple
+              ref={attachmentInputRef}
+              onChange={handleAttachmentChange}
+              style={{ display: 'none' }} 
+            />
+
+            <div 
+              className={`cursor-pointer border-2 border-dashed p-6 rounded-lg text-center transition-colors ${isDraggingAttachment ? 'border-teal-500 bg-teal-50' : 'border-gray-300 text-gray-500 hover:bg-gray-50'}`}
+              onClick={() => attachmentInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setIsDraggingAttachment(true); }}
+              onDragLeave={() => setIsDraggingAttachment(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDraggingAttachment(false);
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                  processAttachments(e.dataTransfer.files);
+                }
+              }}
+            >
+              <FaFolderOpen size={28} className={`mx-auto mb-3 ${isDraggingAttachment ? 'text-teal-500' : 'text-gray-400'}`} />
               Drop & Drag files here or{" "}
-              <span className="text-blue-600 cursor-pointer hover:underline">
+              <span 
+                className="text-blue-600 hover:underline font-medium"
+              >
                 browse from device
               </span>
             </div>
 
-            {formData.attachments &&
-              formData.attachments.map((file, index) => (
-                <p
-                  key={index}
-                  className="text-sm text-gray-600 flex items-center"
-                >
-                  <FaPaperclip className="mr-2" /> {file}
-                </p>
-              ))}
+            {formData.attachments && formData.attachments.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {formData.attachments.map((file, index) => (
+                  <div
+                    key={index}
+                    className="text-sm text-gray-700 flex items-center justify-between bg-gray-100 p-2 rounded-md"
+                  >
+                    <div className="flex items-center truncate">
+                      <FaPaperclip className="mr-3 text-gray-400 flex-shrink-0" /> 
+                      <span className="truncate">{typeof file === 'object' ? file.name : file}</span>
+                    </div>
+                    <button 
+                      onClick={() => handleRemoveAttachment(index)}
+                      className="text-gray-400 hover:text-red-500 ml-2 flex-shrink-0 p-1"
+                      title="Remove attachment"
+                    >
+                      <FaTimes />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-3 pt-4">

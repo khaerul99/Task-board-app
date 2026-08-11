@@ -1,6 +1,7 @@
 import React from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { MdOutlineTimer } from "react-icons/md";
+import { FaRegCheckSquare, FaPaperclip } from "react-icons/fa";
 import { useSortable } from "@dnd-kit/sortable";
 import { TEAM_MEMBERS, MAX_AVATAR } from "../../store/taskStore";
 
@@ -66,12 +67,6 @@ export default function TaskCard({ task, columnId, onEditTask, isOverlay }) {
           <h4 className={`font-semibold text-sm mb-4 px-3 py-1 text-center w-fit rounded-full ${getLabelColors(task.label)}`}>
             {task.label}
           </h4>
-          <div className="text-[20px] text-gray-500">
-            <span>{task.title}</span>
-          </div>
-          <div>
-            {task.description}
-          </div>
 
           {total > 0 && (
             <div className="mt-2">
@@ -86,12 +81,40 @@ export default function TaskCard({ task, columnId, onEditTask, isOverlay }) {
               </div>
             </div>
           )}
+          
+          <div className="text-[20px] text-gray-500">
+            <span>{task.title}</span>
+          </div>
+          <div>
+            {task.description}
+          </div>
 
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2 rounded-4xl bg-green-200 p-2 text-[12px]">
-              <MdOutlineTimer />
-              <span>{task.dueDate || ""}</span>
+          <div className="flex justify-between items-center mt-4">
+            <div className="flex items-center gap-3 text-gray-500 text-xs font-semibold">
+              {task.dueDate && (
+                <div className="flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-2.5 py-1.5">
+                  <MdOutlineTimer size={14} />
+                  <span>{task.dueDate}</span>
+                </div>
+              )}
+
+              
+
+              {total > 0 && (
+                <div className={`flex items-center gap-1 ${completed === total ? 'text-green-600' : 'text-gray-500'}`}>
+                  <FaRegCheckSquare size={14} />
+                  <span>{completed}/{total}</span>
+                </div>
+              )}
+
+              {task.attachments && task.attachments.length > 0 && (
+                <div className="flex items-center gap-1 text-gray-500">
+                  <FaPaperclip size={14} />
+                  <span>{task.attachments.length}</span>
+                </div>
+              )}
             </div>
+            
             <div className="flex -space-x-3 ">
               {visibleMembers.map((member) => (
                 <div
