@@ -134,7 +134,7 @@ export default function Board({onEditTask, onOpen}) {
                             onClick={handleOpenColumnModal}
                             className="w-full p-3 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center hover:bg-gray-200 transition border-dashed border-2 border-gray-300"
                          >
-                            <FaPlus className="mr-2"/> Add Another Column
+                            <FaPlus className="mr-2"/> Add Column
                          </button>
                     </div>   
                     </div>
